@@ -119,7 +119,6 @@ int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_funct
     socket_tcp new_socket = 0;
     struct sockaddr_in peer_addr = {0};
     int addr_len = sizeof(peer_addr);
-    char buf[1<<16] = { 0 };
 
     // Listen for connections
     if ( listen(_socket_tcp, 1) == -1 ) goto failed_to_listen;
@@ -133,21 +132,165 @@ int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_funct
     // Callback
     pfn_tcp_accept_callback(new_socket, ntohl(peer_addr.sin_addr.s_addr), ntohs(peer_addr.sin_port));
 
-    
-    while(1)
+    // Success
+    return 1;
+
+    // Error handling
     {
-        for (size_t i = 0; i < 1<<16; i++)
-            buf[i] = '\0';
-        
-        recv(new_socket, buf, (1<<16), 0);
-        printf("%s\n",buf);
+
+        // Socket errors
+        {
+            failed_to_listen:
+                #ifndef NDEBUG
+                    printf("[socket] Call to function \"listen\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+            failed_to_connect:
+                #ifndef NDEBUG
+                    printf("[socket] Call to function \"connect\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
     }
+}
+
+int socket_tcp_receive ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_len )
+{
+
+    // Argument check
+    if ( p_buffer == (void *) 0 ) goto no_buffer;
+
+    // Receive data from the TCP socket
+    if ( recv(_socket_tcp, p_buffer, buffer_len, 0) == -1 ) goto failed_to_recv;
 
     // Success
     return 1;
 
-    failed_to_listen:
-        return 0;
-    failed_to_connect:
-        return 0;
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_buffer:
+                #ifndef NDEBUG
+                    printf("[socket] Null pointer provided for parameter \"p_buffer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif 
+
+                // Error
+                return 0;
+        }
+
+        // Socket errors
+        {
+            failed_to_recv:
+                #ifndef NDEBUG
+                    printf("[socket] Call to \"recv\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int socket_tcp_send ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_len )
+{
+
+    // Argument check
+    if ( p_buffer   == (void *) 0 ) goto no_buffer;
+    if ( buffer_len ==          0 ) return 1;
+
+    // Send data to the TCP socket
+    if ( send(_socket_tcp, p_buffer, buffer_len, 0) == -1 ) goto failed_to_send;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_buffer:
+                #ifndef NDEBUG
+                    printf("[socket] Null pointer provided for parameter \"p_buffer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif 
+
+                // Error
+                return 0;
+        }
+
+        // Socket errors
+        {
+            failed_to_send:
+                #ifndef NDEBUG
+                    printf("[socket] Call to \"send\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int socket_tcp_destroy ( socket_tcp *p_socket_tcp )
+{
+
+    // Argument check
+    if ( p_socket_tcp == (void *) 0 ) goto no_socket;
+
+    // Initialized data
+    socket_tcp _socket_tcp = *p_socket_tcp;
+
+    // No more pointer for caller
+    *p_socket_tcp = 0;
+
+    // Shutdown the socket
+    if ( shutdown(_socket_tcp, SHUT_RDWR) == -1 ) goto failed_to_shutdown_socket;
+    
+    // Close the socket
+    if ( close(_socket_tcp) == -1 ) goto failed_to_close_socket;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_socket:
+                #ifndef NDEBUG
+                    printf("[socket] Null pointer provided for parameter \"p_socket_tcp\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Socket errors
+        {
+            failed_to_shutdown_socket:
+                #ifndef NDEBUG
+                    printf("[socket] Call to function \"shutdown\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+            failed_to_close_socket:
+                #ifndef NDEBUG
+                    printf("[socket] Call to function \"close\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+                
+        }
+    }
 }
