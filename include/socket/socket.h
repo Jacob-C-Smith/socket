@@ -64,7 +64,7 @@ typedef int(*socket_tcp_accept_callback_function_t)( socket_tcp _socket_tcp, uns
 /** !
  * Create a TCP socket
  * 
- * @param p_socket_tcp : return
+ * @param p_socket_tcp return
  * @param address_family socket_address_family_ipv4 -or- socket_address_family_ipv6
  * @param port_number the port number
  * 
@@ -74,4 +74,51 @@ typedef int(*socket_tcp_accept_callback_function_t)( socket_tcp _socket_tcp, uns
  */
 DLLEXPORT int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_family_e address_family, unsigned short port_number );
 
+/** !
+ * Block and listen for a connection on a TCP socket, then call pfn_tcp_accept_callback.
+ * 
+ * @param _socket_tcp the TCP socket
+ * @param pfn_tcp_accept_callback a callback function parameterized with the new socket, the IP address, and the port number
+ * 
+ * @sa tcp_socket_bind
+ * 
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_function_t pfn_tcp_accept_callback );
+
+/** !
+ * Receive data from a TCP socket, and store in a buffer
+ * 
+ * @param _socket_tcp the TCP socket
+ * @param p_buffer the buffer
+ * @param buffer_len the maximum number of bytes to store in p_buffer
+ * 
+ * @sa socket_tcp_send
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int socket_tcp_receive ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_len );
+
+/** !
+ * Send data to a TCP socket
+ * 
+ * @param _socket_tcp the TCP socket
+ * @param p_buffer the data to send
+ * @param buffer_len the size of the data in bytes
+ * 
+ * @sa socket_tcp_receive
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int socket_tcp_send ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_len );
+
+/** !
+ * Destroy a TCP socket
+ * 
+ * @param p_socket_tcp pointer to the TCP socket
+ * 
+ * @sa socket_tcp_create
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int socket_tcp_destroy ( socket_tcp *p_socket_tcp );
