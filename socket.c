@@ -198,7 +198,7 @@ int socket_tcp_receive ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_l
     }
 }
 
-int socket_tcp_send ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_len )
+int socket_tcp_send ( socket_tcp _socket_tcp, const void *const p_buffer, size_t buffer_len )
 {
 
     // Argument check
@@ -234,6 +234,28 @@ int socket_tcp_send ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_len 
 
                 // Error
                 return 0;
+        }
+    }
+}
+
+int socket_tcp_connect ( socket_tcp _socket_tcp, socket_ip_address ip_address, socket_port port_number )
+{
+
+    // Initialized data
+    //
+
+    // Connect to the socket
+    // if ( connect(_socket_tcp,  , socklen_t addrlen) != 0 ) goto failed_to_connect;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Socket errors
+        {
+
         }
     }
 }

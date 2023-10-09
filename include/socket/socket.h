@@ -37,6 +37,9 @@
     typedef int socket_tcp;
 #endif
 
+typedef unsigned long socket_ip_address;
+typedef unsigned short socket_port;
+
 // Platform dependent enumerations
 #ifdef _WIN64
     enum socket_address_family_e {
@@ -59,7 +62,17 @@
 #endif
 
 // Type definitions
-typedef int(*socket_tcp_accept_callback_function_t)( socket_tcp _socket_tcp, unsigned long ip_address, unsigned short port );
+typedef int(*socket_tcp_accept_callback_function_t)( socket_tcp _socket_tcp, socket_ip_address ip_address, socket_port port_number );
+
+/** !
+ * Return an IP address from a host 
+ * 
+ * @param p_ip_address return
+ * @param hostname the name of the host
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int socket_resolve_host ( socket_ip_address *p_ip_address, const char *const hostname );
 
 /** !
  * Create a TCP socket
@@ -72,7 +85,7 @@ typedef int(*socket_tcp_accept_callback_function_t)( socket_tcp _socket_tcp, uns
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_family_e address_family, unsigned short port_number );
+DLLEXPORT int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_family_e address_family, socket_port port_number );
 
 /** !
  * Block and listen for a connection on a TCP socket, then call pfn_tcp_accept_callback.
@@ -97,7 +110,7 @@ DLLEXPORT int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_call
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int socket_tcp_receive ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_len );
+DLLEXPORT int socket_tcp_receive ( socket_tcp _socket_tcp, void *const p_buffer, size_t buffer_len );
 
 /** !
  * Send data to a TCP socket
@@ -110,7 +123,20 @@ DLLEXPORT int socket_tcp_receive ( socket_tcp _socket_tcp, void *p_buffer, size_
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int socket_tcp_send ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_len );
+DLLEXPORT int socket_tcp_send ( socket_tcp _socket_tcp, const void *const p_buffer, size_t buffer_len );
+
+/** !
+ * TODO: Connect to a TCP socket
+ * 
+ * @param _socket_tcp the TCP socket
+ * @param ip_address the IP address of the server
+ * @param port_number the port number
+ * 
+ * @sa socket_tcp_receive
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int socket_tcp_connect ( socket_tcp _socket_tcp, socket_ip_address ip_address, socket_port port_number );
 
 /** !
  * Destroy a TCP socket
