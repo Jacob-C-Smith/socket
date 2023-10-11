@@ -42,7 +42,7 @@ int main ( int argc, const char *argv[] )
     socket_tcp_create(&_tcp_socket, socket_address_family_ipv4, 3000);
 
     // This will cause GitHub actions to wait forever. No can do.
-    //socket_tcp_listen(_tcp_socket, &accept_callback);
+    //socket_tcp_listen(_tcp_socket, &accept_callback, 0);
 
     // Success
     return EXIT_SUCCESS;

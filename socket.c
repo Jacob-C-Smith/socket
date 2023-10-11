@@ -42,7 +42,7 @@ int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_fami
     #else
 
         // Create the socket
-        _socket_tcp = socket(address_family, socket_type_tcp, IPPROTO_TCP);
+        _socket_tcp = socket(address_family, socket_type_tcp | SOCK_NONBLOCK, IPPROTO_TCP);
 
         // Error check
         if ( _socket_tcp == -1 ) goto failed_to_create_socket;
@@ -112,7 +112,7 @@ int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_fami
     }
 }
 
-int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_function_t pfn_tcp_accept_callback )
+int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_function_t pfn_tcp_accept_callback, void *const p_tcp_accept_callback_parameter )
 {
 
     // Initialized data
@@ -130,7 +130,7 @@ int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_funct
     if ( new_socket == -1 ) goto failed_to_connect;
     
     // Callback
-    pfn_tcp_accept_callback(new_socket, ntohl(peer_addr.sin_addr.s_addr), ntohs(peer_addr.sin_port));
+    pfn_tcp_accept_callback(new_socket, ntohl(peer_addr.sin_addr.s_addr), ntohs(peer_addr.sin_port), p_tcp_accept_callback_parameter);
 
     // Success
     return 1;
@@ -166,7 +166,7 @@ int socket_tcp_receive ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_l
     if ( p_buffer == (void *) 0 ) goto no_buffer;
 
     // Receive data from the TCP socket
-    if ( recv(_socket_tcp, p_buffer, buffer_len, 0) == -1 ) goto failed_to_recv;
+    if ( recv(_socket_tcp, p_buffer, buffer_len, MSG_DONTWAIT) == -1 ) goto failed_to_recv;
 
     // Success
     return 1;
