@@ -39,10 +39,24 @@ int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_fami
         // Error check
         if ( _socket_tcp == INVALID_SOCKET ) goto failed_to_create_socket;
 
+    #elif __APPLE__
+
+        // Create the socket
+        _socket_tcp = socket(address_family, socket_type_tcp, IPPROTO_TCP);
+
+        // Error check
+        if ( _socket_tcp == -1 ) goto failed_to_create_socket;
+        
+        // Set socket options
+        if ( setsockopt(_socket_tcp, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) == -1 ) goto failed_to_set_socket_option;
+
+        // Bind the socket to the port
+        if ( bind(_socket_tcp,(struct sockaddr*) &socket_address, sizeof(socket_address)) == -1 ) goto failed_to_bind_socket;
+
     #else
 
         // Create the socket
-        _socket_tcp = socket(address_family, socket_type_tcp | SOCK_NONBLOCK, IPPROTO_TCP);
+        _socket_tcp = socket(address_family, socket_type_tcp | SOCK_NOBLOCK, IPPROTO_TCP);
 
         // Error check
         if ( _socket_tcp == -1 ) goto failed_to_create_socket;
