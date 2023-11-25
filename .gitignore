@@ -61,3 +61,4 @@ dkms.conf
 .vs/
 build/
 Makefile
+Icon?
