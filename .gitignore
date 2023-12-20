@@ -62,3 +62,4 @@ dkms.conf
 build/
 Makefile
 Icon?
+.DS_Store
