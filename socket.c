@@ -180,7 +180,7 @@ int socket_tcp_receive ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_l
     if ( p_buffer == (void *) 0 ) goto no_buffer;
 
     // Receive data from the TCP socket
-    if ( recv(_socket_tcp, p_buffer, buffer_len, MSG_DONTWAIT) == -1 ) goto failed_to_recv;
+    if ( recv(_socket_tcp, p_buffer, buffer_len, 0) == -1 ) goto failed_to_recv;
 
     // Success
     return 1;
@@ -286,11 +286,24 @@ int socket_tcp_destroy ( socket_tcp *p_socket_tcp )
     // No more pointer for caller
     *p_socket_tcp = 0;
 
-    // Shutdown the socket
-    if ( shutdown(_socket_tcp, SHUT_RDWR) == -1 ) goto failed_to_shutdown_socket;
-    
-    // Close the socket
-    if ( close(_socket_tcp) == -1 ) goto failed_to_close_socket;
+    // Platform dependent implementation
+    #ifdef _WIN64
+
+        // Shutdown the socket
+        if ( shutdown(_socket_tcp, SD_SEND) == -1 ) goto failed_to_shutdown_socket;
+        
+        // Close the socket
+        if ( closesocket(_socket_tcp) == -1 ) goto failed_to_close_socket;
+
+    #else
+
+        // Shutdown the socket
+        if ( shutdown(_socket_tcp, SHUT_RDWR) == -1 ) goto failed_to_shutdown_socket;
+        
+        // Close the socket
+        if ( close(_socket_tcp) == -1 ) goto failed_to_close_socket;
+
+    #endif
 
     // Success
     return 1;

@@ -15,7 +15,6 @@
 // Platform dependent includes
 #ifdef _WIN64
     #include <Winsock2.h>
-    #include <ws2tcpip.h>
 #else
     #include <sys/socket.h>
     #include <unistd.h>

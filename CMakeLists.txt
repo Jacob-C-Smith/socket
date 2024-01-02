@@ -17,6 +17,8 @@ if (${IS_DEBUG_BUILD})
     add_compile_definitions(NDEBUG)
 endif()
 
+add_compile_definitions(_win64)
+
 # Add the socket project
 if ( NOT "${HAS_SOCKET}")
 
@@ -41,3 +43,6 @@ target_link_libraries(socket_example socket)
 # Add source to the library
 add_library(socket SHARED "socket.c")
 target_include_directories(socket PUBLIC ${SOCKET_INCLUDE_DIR})
+if(WIN32)
+  target_link_libraries(socket wsock32 ws2_32)
+endif()
