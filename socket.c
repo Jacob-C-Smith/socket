@@ -56,7 +56,7 @@ int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_fami
     #else
 
         // Create the socket
-        _socket_tcp = socket(address_family, socket_type_tcp | SOCK_NONBLOCK, IPPROTO_TCP);
+        _socket_tcp = socket(address_family, socket_type_tcp, IPPROTO_TCP);
 
         // Error check
         if ( _socket_tcp == -1 ) goto failed_to_create_socket;
@@ -217,7 +217,6 @@ int socket_tcp_send ( socket_tcp _socket_tcp, const void *const p_buffer, size_t
 
     // Argument check
     if ( p_buffer   == (void *) 0 ) goto no_buffer;
-    if ( buffer_len ==          0 ) return 1;
 
     // Send data to the TCP socket
     if ( send(_socket_tcp, p_buffer, buffer_len, 0) == -1 ) goto failed_to_send;
@@ -252,14 +251,111 @@ int socket_tcp_send ( socket_tcp _socket_tcp, const void *const p_buffer, size_t
     }
 }
 
-int socket_tcp_connect ( socket_tcp _socket_tcp, socket_ip_address ip_address, socket_port port_number )
+int socket_tcp_connect ( socket_tcp *const p_socket_tcp, enum socket_address_family_e address_family, socket_ip_address ip_address, socket_port port_number )
+{
+
+    // Argument check
+    if ( p_socket_tcp == (void *) 0 ) goto no_tcp_socket; 
+
+    // Platform specific initialized data
+    #ifdef _WIN64
+        socket_tcp _socket_tcp = INVALID_SOCKET;
+    #else
+        socket_tcp _socket_tcp = -1;
+        struct sockaddr_in serv_addr =
+        {
+            .sin_family = address_family,
+            .sin_addr.s_addr = htonl(ip_address),
+            .sin_port = htons(port_number),
+            .sin_zero = { 0 }
+        };
+    #endif
+
+    // Platform specific implementation
+    #ifdef _WIN64
+
+
+    #elif __APPLE__
+
+    #else
+
+        // Create the socket
+        _socket_tcp = socket(address_family, socket_type_tcp, IPPROTO_TCP);
+
+        // Error check
+        if ( _socket_tcp == -1 ) goto failed_to_create_socket;
+        
+        // Connect to the socket
+        if ( connect(_socket_tcp, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) ) goto failed_to_connect; 
+    #endif
+
+    // Return a socket to the caller
+    *p_socket_tcp = _socket_tcp;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+        
+        // Argument errors
+        {
+            no_tcp_socket:
+                #ifndef NDEBUG
+                    printf("[socket] Null pointer provided for parameter \"p_tcp_socket\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Socket errors
+        {
+            failed_to_create_socket:
+                #ifndef NDEBUG
+                    printf("[socket] Call to function \"socket\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_connect:
+                #ifndef NDEBUG
+                    printf("[socket] Call to function \"connect\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int socket_resolve_host ( socket_ip_address *p_ip_address, const char *restrict p_hostname )
 {
 
     // Initialized data
-    //
+    struct addrinfo  hints = { 0 },
+                    *addr_result = 0;
+    struct sockaddr_in *ipv4 = (void *) 0;
+    int result = 0;
 
-    // Connect to the socket
-    // if ( connect(_socket_tcp,  , socklen_t addrlen) != 0 ) goto failed_to_connect;
+    // Initialize the hints structure
+    hints = (struct addrinfo)
+    {
+        .ai_family   = AF_INET,
+        .ai_socktype = SOCK_STREAM
+    };
+
+    // Get address info
+    result = getaddrinfo(p_hostname, NULL, &hints, &addr_result);
+
+    // Error check
+    if ( result ) goto failed_to_resolve_address;
+
+    // Store the address
+    ipv4 = (struct sockaddr_in *)addr_result->ai_addr;
+
+    *p_ip_address = ntohl(ipv4->sin_addr.s_addr);
 
     // Success
     return 1;
@@ -269,7 +365,13 @@ int socket_tcp_connect ( socket_tcp _socket_tcp, socket_ip_address ip_address, s
 
         // Socket errors
         {
+            failed_to_resolve_address:
+                #ifndef NDEBUG
+                    printf("[socket] Failed to resolve hostname \"%s\" in call to function \"%s\". Network database says: %s", p_hostname, __FUNCTION__, gai_stderr(result));
+                #endif
 
+                // Error
+                return 0;
         }
     }
 }
@@ -296,6 +398,8 @@ int socket_tcp_destroy ( socket_tcp *p_socket_tcp )
         if ( closesocket(_socket_tcp) == -1 ) goto failed_to_close_socket;
 
     #else
+
+        socket_tcp_send(_socket_tcp, "", 0);
 
         // Shutdown the socket
         if ( shutdown(_socket_tcp, SHUT_RDWR) == -1 ) goto failed_to_shutdown_socket;

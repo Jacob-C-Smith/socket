@@ -37,12 +37,23 @@ int main ( int argc, const char *argv[] )
 
     // Initialized data
     socket_tcp _tcp_socket = 0;
+    socket_ip_address g10_app = 0;
 
-    // Create a socket
-    socket_tcp_create(&_tcp_socket, socket_address_family_ipv4, 3000);
+    // Resolve "g10.app"
+    socket_resolve_host(&g10_app, "g10.app");
 
-    // This will cause GitHub actions to wait forever. No can do.
-    //socket_tcp_listen(_tcp_socket, &accept_callback, 0);
+    // Initialized data
+    unsigned char a = (g10_app & 0xff000000) >> 24,
+                  b = (g10_app & 0x00ff0000) >> 16,
+                  c = (g10_app & 0x0000ff00) >> 8,
+                  d = (g10_app & 0x000000ff) >> 0;
+    
+    // Log the IP
+    printf("%d.%d.%d.%d\n", a, b, c, d);
+
+    socket_tcp_connect(&_tcp_socket, socket_address_family_ipv4, g10_app, 6710);
+
+    socket_tcp_destroy(&_tcp_socket);
 
     // Success
     return EXIT_SUCCESS;

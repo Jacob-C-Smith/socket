@@ -11,6 +11,9 @@
 
 // Includes
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
 // Platform dependent includes
 #ifdef _WIN64
@@ -19,7 +22,8 @@
     #include <sys/socket.h>
     #include <unistd.h>
     #include <netinet/in.h>
-    #include <errno.h>
+    #include <netdb.h>
+    #include <arpa/inet.h>
 #endif
 
 // Platform dependent macros
@@ -67,11 +71,11 @@ typedef int(*socket_tcp_accept_callback_function_t)( socket_tcp _socket_tcp, soc
  * Return an IP address from a host 
  * 
  * @param p_ip_address return
- * @param hostname the name of the host
+ * @param p_hostname   the name of the host
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int socket_resolve_host ( socket_ip_address *p_ip_address, const char *const hostname );
+DLLEXPORT int socket_resolve_host ( socket_ip_address *p_ip_address, const char *restrict p_hostname );
 
 /** !
  * Create a TCP socket
@@ -135,7 +139,7 @@ DLLEXPORT int socket_tcp_send ( socket_tcp _socket_tcp, const void *const p_buff
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int socket_tcp_connect ( socket_tcp _socket_tcp, socket_ip_address ip_address, socket_port port_number );
+DLLEXPORT int socket_tcp_connect ( socket_tcp *const p_socket_tcp, enum socket_address_family_e address_family, socket_ip_address ip_address, socket_port port_number );
 
 /** !
  * Destroy a TCP socket
