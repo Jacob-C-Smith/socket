@@ -179,8 +179,11 @@ int socket_tcp_receive ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_l
     // Argument check
     if ( p_buffer == (void *) 0 ) goto no_buffer;
 
-    // Receive data from the TCP socket
-    if ( recv(_socket_tcp, p_buffer, buffer_len, 0) == -1 ) goto failed_to_recv;
+    // Initialized data
+    int r = recv(_socket_tcp, p_buffer, buffer_len, 0);
+
+    // Error check
+    if ( r < 1 ) goto failed_to_recv;
 
     // Success
     return 1;
