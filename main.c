@@ -35,6 +35,10 @@ int accept_callback ( socket_tcp _socket_tcp, unsigned long ip_address, unsigned
 int main ( int argc, const char *argv[] )
 {
 
+    // Unused
+    (void) argc;
+    (void) argv;
+
     // Initialized data
     socket_tcp _tcp_socket = 0;
     socket_ip_address g10_app = 0;

@@ -23,7 +23,7 @@ int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_fami
         int option = 1;
         struct sockaddr_in socket_address =
         {
-            .sin_family = address_family,
+            .sin_family = (unsigned short) address_family,
             .sin_addr.s_addr = htonl(INADDR_ANY),
             .sin_port = htons(port_number),
             .sin_zero = { 0 }
@@ -56,7 +56,7 @@ int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_fami
     #else
 
         // Create the socket
-        _socket_tcp = socket(address_family, socket_type_tcp, IPPROTO_TCP);
+        _socket_tcp = socket((int)address_family, socket_type_tcp, IPPROTO_TCP);
 
         // Error check
         if ( _socket_tcp == -1 ) goto failed_to_create_socket;
@@ -115,13 +115,6 @@ int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_fami
                 // Error
                 return 0;
 
-            failed_to_listen:
-                #ifndef NDEBUG
-                    printf("[socket] Failed to listen on socket\n");
-                #endif
-
-                // Error
-                return 0;
         }
     }
 }
@@ -132,7 +125,7 @@ int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_funct
     // Initialized data
     socket_tcp new_socket = 0;
     struct sockaddr_in peer_addr = {0};
-    int addr_len = sizeof(peer_addr);
+    unsigned int addr_len = sizeof(peer_addr);
 
     // Listen for connections
     if ( listen(_socket_tcp, 1) == -1 ) goto failed_to_listen;
@@ -144,7 +137,7 @@ int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_funct
     if ( new_socket == -1 ) goto failed_to_connect;
     
     // Callback
-    pfn_tcp_accept_callback(new_socket, ntohl(peer_addr.sin_addr.s_addr), ntohs(peer_addr.sin_port), p_tcp_accept_callback_parameter);
+    pfn_tcp_accept_callback(new_socket, ntohl(peer_addr.sin_addr.s_addr), (unsigned short) ntohs(peer_addr.sin_port), p_tcp_accept_callback_parameter);
 
     // Success
     return 1;
@@ -180,7 +173,7 @@ int socket_tcp_receive ( socket_tcp _socket_tcp, void *p_buffer, size_t buffer_l
     if ( p_buffer == (void *) 0 ) goto no_buffer;
 
     // Initialized data
-    int r = recv(_socket_tcp, p_buffer, buffer_len, 0);
+    size_t r = (size_t) recv(_socket_tcp, p_buffer, buffer_len, 0);
 
     // Error check
     if ( r < 1 ) goto failed_to_recv;
@@ -267,8 +260,8 @@ int socket_tcp_connect ( socket_tcp *const p_socket_tcp, enum socket_address_fam
         socket_tcp _socket_tcp = -1;
         struct sockaddr_in serv_addr =
         {
-            .sin_family = address_family,
-            .sin_addr.s_addr = htonl(ip_address),
+            .sin_family = (unsigned short) address_family,
+            .sin_addr.s_addr = (unsigned int) htonl((unsigned int)ip_address),
             .sin_port = htons(port_number),
             .sin_zero = { 0 }
         };
@@ -283,7 +276,7 @@ int socket_tcp_connect ( socket_tcp *const p_socket_tcp, enum socket_address_fam
     #else
 
         // Create the socket
-        _socket_tcp = socket(address_family, socket_type_tcp, IPPROTO_TCP);
+        _socket_tcp = socket((int) address_family, socket_type_tcp, IPPROTO_TCP);
 
         // Error check
         if ( _socket_tcp == -1 ) goto failed_to_create_socket;
