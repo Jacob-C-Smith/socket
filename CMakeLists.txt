@@ -16,6 +16,7 @@ set(IS_DEBUG_BUILD CMAKE_BUILD_TYPE STREQUAL "Debug")
 if (${IS_DEBUG_BUILD})
     add_compile_definitions(NDEBUG)
 endif()
+add_compile_options(-gdwarf-4 -Wall -Wextra -Wpointer-arith -Wstrict-prototypes -Wformat-security -Wfloat-equal -Wshadow -Wconversion -Wlogical-not-parentheses -Wnull-dereference)
 
 add_compile_definitions(_win64)
 
