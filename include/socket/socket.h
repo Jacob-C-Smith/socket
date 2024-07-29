@@ -65,7 +65,7 @@ typedef unsigned short socket_port;
 #endif
 
 // Type definitions
-typedef int(*socket_tcp_accept_callback_function_t)( socket_tcp _socket_tcp, socket_ip_address ip_address, socket_port port_number, void *const vp_parameter );
+typedef int(*fn_socket_tcp_accept)( socket_tcp _socket_tcp, socket_ip_address ip_address, socket_port port_number, void *const p_parameter );
 
 /** !
  * Return an IP address from a host 
@@ -100,7 +100,7 @@ DLLEXPORT int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_ad
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_function_t pfn_tcp_accept_callback, void *const p_tcp_accept_callback_parameter );
+DLLEXPORT int socket_tcp_listen ( socket_tcp _socket_tcp, fn_socket_tcp_accept pfn_tcp_accept_callback, void *const p_parameter );
 
 /** !
  * Receive data from a TCP socket, and store in a buffer

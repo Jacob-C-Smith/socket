@@ -119,7 +119,7 @@ int socket_tcp_create ( socket_tcp *const p_socket_tcp, enum socket_address_fami
     }
 }
 
-int socket_tcp_listen ( socket_tcp _socket_tcp, socket_tcp_accept_callback_function_t pfn_tcp_accept_callback, void *const p_tcp_accept_callback_parameter )
+int socket_tcp_listen ( socket_tcp _socket_tcp, fn_socket_tcp_accept pfn_tcp_accept_callback, void *const p_tcp_accept_callback_parameter )
 {
 
     // Initialized data
