@@ -363,7 +363,7 @@ int socket_resolve_host ( socket_ip_address *p_ip_address, const char *restrict 
         {
             failed_to_resolve_address:
                 #ifndef NDEBUG
-                    printf("[socket] Failed to resolve hostname \"%s\" in call to function \"%s\". Network database says: %s", p_hostname, __FUNCTION__, gai_stderr(result));
+                    printf("[socket] Failed to resolve hostname \"%s\" in call to function \"%s\". Network database says: %s", p_hostname, __FUNCTION__, gai_strerror(result));
                 #endif
 
                 // Error
