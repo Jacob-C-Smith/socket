@@ -1,0 +1,10 @@
+{
+    "name"        : "socket",
+    "group"       : "Primitives",
+    "description" : "Cross platform network connections",
+    "repository"  : "https://github.com/Jacob-C-Smith/socket",
+    "icon"        : "https://icons.g10.app/socket.png",
+    "tested"      : "dc",
+    "thread safe" : true,
+    "demo"        : "https://codespaces.new/Jacob-C-Smith/socket?quickstart=1"
+}
